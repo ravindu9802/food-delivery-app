@@ -13,11 +13,12 @@ namespace FoodDeliveryApp.Models
         public string Phone { get; set; } = string.Empty;
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
-        [Required]
-        public int UserId { get; set; }
+        //[Required]
+        //public int UserId { get; set; }
 
-        [JsonIgnore]
-        public virtual User? User { get; set; }
+        //[JsonIgnore]
+        //public virtual User? User { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using FoodDeliveryApp.Entities;
 using FoodDeliveryApp.Models;
+using FoodDeliveryApp.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodDeliveryApp.Controllers
@@ -38,11 +39,11 @@ namespace FoodDeliveryApp.Controllers
         [HttpPost]
         public ActionResult PostRestaurant(Restaurant restaurant)
         {
-            var user = _dBContext.Users.Find(restaurant.UserId);
+            IQueryable<Restaurant> existingRestaurant = _dBContext.Restaurants.Where(r => r.Email == restaurant.Email);
 
-            if (user == null)
+            if (existingRestaurant.ToList().Count > 0)
             {
-                return BadRequest("Invalid UserId");
+                return BadRequest("Restaurant Exist");
             }
 
             _dBContext.Restaurants.Add(restaurant);
@@ -59,17 +60,36 @@ namespace FoodDeliveryApp.Controllers
                 return BadRequest();
             }
 
-            var user = _dBContext.Users.Find(restaurant.UserId);
+            //var user = _dBContext.Users.Find(restaurant.UserId);
 
-            if (user == null)
-            {
-                return BadRequest("Invalid UserId");
-            }
+            //if (user == null)
+            //{
+            //    return BadRequest("Invalid UserId");
+            //}
 
             _dBContext.Restaurants.Update(restaurant);
             _dBContext.SaveChanges();
 
             return CreatedAtAction("GetRestaurant", new { id = restaurant.Id }, restaurant);
+        }
+
+        [HttpGet]
+        [Route("login")]
+        public ActionResult GetLogin([FromQuery] string email, string password)
+        {
+            IQueryable<Restaurant> existingUser = _dBContext.Restaurants.Where(u => u.Email == email);
+
+            if (existingUser.ToList().Count == 0)
+            {
+                return BadRequest("Invalid credentials");
+            }
+
+            if (PasswordHash.Validate(existingUser.ToList()[0].Password, password))
+            {
+                return Ok("Login success");
+            }
+
+            return BadRequest("Invalid credentials");
         }
     }
 }

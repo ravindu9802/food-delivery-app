@@ -16,8 +16,8 @@ namespace FoodDeliveryApp.Models
         public string Phone { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
 
-        [JsonIgnore]
-        public virtual List<Restaurant>? Restaurants { get; set; }
+        //[JsonIgnore]
+        //public virtual List<Restaurant>? Restaurants { get; set; }
 
     }
 }
