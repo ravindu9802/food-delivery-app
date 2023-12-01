@@ -10,24 +10,24 @@ namespace FoodDeliveryApp.Controllers
     public class UserController : ControllerBase
     {
 
-        private readonly UserContext _userContext;
+        private readonly DBContext _dBContext;
 
-        public UserController(UserContext userContext)
+        public UserController(DBContext dBContext)
         {
-            _userContext = userContext;
-            _userContext.Database.EnsureCreated();
+            _dBContext = dBContext;
+            _dBContext.Database.EnsureCreated();
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<User>> GetAllUsers()
         {
-            return Ok(_userContext.Users.ToList());
+            return Ok(_dBContext.Users.ToList());
         }
 
         [HttpGet("{id}")]
         public ActionResult<User> GetUser(int id)
         {
-            var user = _userContext.Users.Find(id);
+            var user = _dBContext.Users.Find(id);
 
             if (user == null)
             {
@@ -40,7 +40,7 @@ namespace FoodDeliveryApp.Controllers
         [HttpPost]
         public ActionResult PostUser(User user)
         {
-            IQueryable<User> existingUser = _userContext.Users.Where(u => u.Email == user.Email);
+            IQueryable<User> existingUser = _dBContext.Users.Where(u => u.Email == user.Email);
 
             if (existingUser.ToList().Count > 0)
             {
@@ -49,8 +49,8 @@ namespace FoodDeliveryApp.Controllers
 
             user.Password = PasswordHash.CreateHash(user.Password);
 
-            _userContext.Users.Add(user);
-            _userContext.SaveChanges();
+            _dBContext.Users.Add(user);
+            _dBContext.SaveChanges();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
@@ -58,10 +58,13 @@ namespace FoodDeliveryApp.Controllers
         [HttpPut("{id}")]
         public ActionResult PutUser(int id,[FromBody] User user)
         {
-            user.Password = PasswordHash.CreateHash(user.Password);
+            if (id != user.Id)
+            {
+                return BadRequest();
+            }
 
-            _userContext.Users.Update(user);
-            _userContext.SaveChanges();
+            _dBContext.Users.Update(user);
+            _dBContext.SaveChanges();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
@@ -70,7 +73,7 @@ namespace FoodDeliveryApp.Controllers
         [Route("login")]
         public ActionResult GetLogin([FromQuery] string email, string password)
         {
-            IQueryable<User> existingUser = _userContext.Users.Where(u => u.Email == email);
+            IQueryable<User> existingUser = _dBContext.Users.Where(u => u.Email == email);
 
             if (existingUser.ToList().Count == 0)
             {
